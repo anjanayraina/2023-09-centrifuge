@@ -101,7 +101,7 @@ contract LiquidityPool is Auth, IERC4626 {
 
     // --- Administration ---
     function file(bytes32 what, address data) public auth {
-        if (what == "investmentManager") investmentManager = InvestmentManagerLike(data);
+        if (what == "investmentManager") investmentManager = InvestmentManagerLike(data); // @audit this will error out when called 
         else revert("LiquidityPool/file-unrecognized-param");
         emit File(what, data);
     }
@@ -109,7 +109,7 @@ contract LiquidityPool is Auth, IERC4626 {
     // --- ERC4626 functions ---
     /// @return Total value of the shares, denominated in the asset of this Liquidity Pools
     function totalAssets() public view returns (uint256) {
-        return investmentManager.totalAssets(totalSupply(), address(this));
+        return investmentManager.totalAssets(totalSupply(), address(this)); // @audit GO hardcode the value of the liquidity pool to save some gas 
     }
 
     /// @notice Calculates the amount of shares that any user would approximately get for the amount of assets provided.
@@ -146,7 +146,7 @@ contract LiquidityPool is Auth, IERC4626 {
     /// @notice Collect shares for deposited assets after Centrifuge epoch execution.
     ///         maxMint is the max amount of shares that can be collected.
     function mint(uint256 shares, address receiver) public returns (uint256 assets) {
-        // require(receiver == msg.sender, "LiquidityPool/not-authorized-to-mint");
+        // require(receiver == msg.sender, "LiquidityPool/not-authorized-to-mint"); //  @audit QA remove out the commented out code that isnt being used 
         assets = investmentManager.processMint(receiver, shares);
         emit Deposit(address(this), receiver, assets, shares);
     }

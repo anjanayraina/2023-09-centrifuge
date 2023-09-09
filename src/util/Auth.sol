@@ -5,7 +5,7 @@ pragma solidity 0.8.21;
 /// @title  Auth
 /// @notice Simple authentication pattern
 contract Auth {
-    mapping(address => uint256) public wards;
+    mapping(address => uint256) public wards; // @audit use boolean instead of uint256
 
     event Rely(address indexed user);
     event Deny(address indexed user);
