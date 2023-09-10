@@ -89,6 +89,7 @@ contract LiquidityPool is Auth, IERC4626 {
         share = TrancheTokenLike(share_);
         investmentManager = InvestmentManagerLike(investmentManager_);
 
+
         wards[msg.sender] = 1;
         emit Rely(msg.sender);
     }
@@ -101,7 +102,7 @@ contract LiquidityPool is Auth, IERC4626 {
 
     // --- Administration ---
     function file(bytes32 what, address data) public auth {
-        if (what == "investmentManager") investmentManager = InvestmentManagerLike(data); // @audit this will error out when called 
+        if (what == "investmentManager") investmentManager = InvestmentManagerLike(data); // @audit this will error out when called , tried this on remix
         else revert("LiquidityPool/file-unrecognized-param");
         emit File(what, data);
     }
@@ -192,11 +193,13 @@ contract LiquidityPool is Auth, IERC4626 {
     function previewRedeem(uint256 shares) public view returns (uint256 assets) {
         assets = investmentManager.previewRedeem(msg.sender, address(this), shares);
     }
-
-    /// @notice Redeem shares after successful epoch execution. Receiver will receive assets for
+    //@audit the comments are not fully written 
+    /// @notice Redeem shares after successful epoch execution. Receiver will receive assets for 
     /// @notice Redeem shares can only be called by the Owner or an authorized admin.
     ///         the exact amount of redeemed shares from Owner after epoch execution.
     /// @return assets payout for the exact amount of redeemed shares
+    //@audit really sus function , this function can be called by anyone
+    // @audit this function doesnt let the an authorized admin make the call   
     function redeem(uint256 shares, address receiver, address owner)
         public
         withApproval(owner)
