@@ -100,6 +100,8 @@ contract InvestmentManager is Auth {
     }
 
     // --- Administration ---
+    // @audit what is the reason of using what check in the function ??
+    //@audit also thsis will error out 
     function file(bytes32 what, address data) external auth {
         if (what == "gateway") gateway = GatewayLike(data);
         else if (what == "poolManager") poolManager = PoolManagerLike(data);
@@ -121,9 +123,10 @@ contract InvestmentManager is Auth {
         uint128 _currencyAmount = _toUint128(currencyAmount);
 
         // Check if liquidity pool currency is supported by the Centrifuge pool
-        poolManager.isAllowedAsPoolCurrency(lPool.poolId(), currency);
+
+        poolManager.isAllowedAsPoolCurrency(lPool.poolId(), currency); // @audit bool value returned is not checked 
         // Check if user is allowed to hold the restricted tranche tokens
-        _isAllowedToInvest(lPool.poolId(), lPool.trancheId(), currency, user);
+        _isAllowedToInvest(lPool.poolId(), lPool.trancheId(), currency, user); // @audit the bool value returned is not checked 
         if (_currencyAmount == 0) {
             // Case: outstanding investment orders only needed to be cancelled
             gateway.cancelInvestOrder(
