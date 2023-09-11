@@ -116,6 +116,9 @@ contract InvestmentManager is Auth {
     ///         If an amount of 0 is passed, this triggers cancelling outstanding deposit orders.
     /// @dev    The user currency amount required to fullfill the deposit request have to be locked,
     ///         even though the tranche token payout can only happen after epoch execution.
+
+    // @audit some of the calls from this functions are checks that are reverting on their own but also returning a bool. Use try catch if you also want to return a bool and revert the tranwsaction 
+    // @audit or use the functions as a helper and add a require after storing the return values from the function  
     function requestDeposit(uint256 currencyAmount, address user) public auth {
         address liquidityPool = msg.sender;
         LiquidityPoolLike lPool = LiquidityPoolLike(liquidityPool);
@@ -177,7 +180,7 @@ contract InvestmentManager is Auth {
     function decreaseDepositRequest(uint256 _currencyAmount, address user) public auth {
         uint128 currencyAmount = _toUint128(_currencyAmount);
         LiquidityPoolLike liquidityPool = LiquidityPoolLike(msg.sender);
-        require(liquidityPool.checkTransferRestriction(address(0), user, 0), "InvestmentManager/not-a-member");
+        require(liquidityPool.checkTransferRestriction(address(0), user, 0), "InvestmentManager/not-a-member"); // @audit there is no use of the first and last parameter while calling the functions , so its better to remove them 
         gateway.decreaseInvestOrder(
             liquidityPool.poolId(),
             liquidityPool.trancheId(),
@@ -190,7 +193,7 @@ contract InvestmentManager is Auth {
     function decreaseRedeemRequest(uint256 _trancheTokenAmount, address user) public auth {
         uint128 trancheTokenAmount = _toUint128(_trancheTokenAmount);
         LiquidityPoolLike liquidityPool = LiquidityPoolLike(msg.sender);
-        require(liquidityPool.checkTransferRestriction(address(0), user, 0), "InvestmentManager/not-a-member");
+        require(liquidityPool.checkTransferRestriction(address(0), user, 0), "InvestmentManager/not-a-member"); // @audit same problem as above 
         gateway.decreaseRedeemOrder(
             liquidityPool.poolId(),
             liquidityPool.trancheId(),
